@@ -89,3 +89,26 @@ std::pair<int, int> Ball::getVelocity()
 {
 	return velocity;
 }
+
+std::pair<int, int> Ball::getPosition(side_t side)
+{
+	std::pair<int, int> sidePosition = position;
+	switch(side)
+	{
+		case LEFT:
+			sidePosition.second += size.second/2;
+			break;
+		case RIGHT:
+			sidePosition.first += size.first;
+			sidePosition.second += size.second/2;
+			break;
+		case TOP:
+			sidePosition.first += size.first/2;
+			break;
+		case BOTTOM:
+			sidePosition.first += size.first/2;
+			sidePosition.second += size.second;
+			break;
+	}
+	return sidePosition;
+}

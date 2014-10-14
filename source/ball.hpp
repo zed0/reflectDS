@@ -4,6 +4,13 @@
 #include <nds.h>
 #include <utility>
 
+enum side_t{
+	LEFT,
+	RIGHT,
+	TOP,
+	BOTTOM
+};
+
 class Ball
 {
 	public:
@@ -12,6 +19,7 @@ class Ball
 		void tick(int time);
 		void setVelocity(std::pair<int, int> velocity);
 		std::pair<int, int> getVelocity();
+		std::pair<int, int> getPosition(side_t side);
 	protected:
 	private:
 		int id;

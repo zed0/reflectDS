@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <iostream>
+#include <algorithm>
 
 #include "block.hpp"
 #include "ball.hpp"
@@ -16,6 +17,8 @@ int main(void) {
 	vramSetBankD(VRAM_D_SUB_SPRITE);
 	oamInit(&oamMain, SpriteMapping_1D_32, false);
 	oamInit(&oamSub, SpriteMapping_1D_32, false);
+
+	//consoleDemoInit(); //Uncomment for debugging
 
 	//set up palette colors:
 	SPRITE_PALETTE[0] = RGB15( 0, 0, 0); //black
@@ -37,7 +40,7 @@ int main(void) {
 	SPRITE_PALETTE_SUB[7] = RGB15(31,31,31); //white
 
 	//create our game objects:
-	Ball ball(0, 4, {20, 20}, {16, 16});
+	Ball ball(0, 4, {20, 50}, {16, 16});
 	ball.setVelocity({1,1});
 	std::vector<Block> blocks;
 	for(int i=0; i<20; ++i)
@@ -55,6 +58,48 @@ int main(void) {
 
 		//do engine updates:
 		ball.tick(1);
+		blocks.erase(
+			std::remove_if(blocks.begin(), blocks.end(),
+				[&](Block block)
+				{
+					bool collision = false;
+					std::pair<int,int> newVelocity = ball.getVelocity();
+					//left
+					if(block.getCollision(ball.getPosition(LEFT)))
+					{
+						newVelocity.first = -newVelocity.first;
+						collision = true;
+					}
+					//right
+					if(block.getCollision(ball.getPosition(RIGHT)))
+					{
+						newVelocity.first = -newVelocity.first;
+						collision = true;
+					}
+					//top
+					if(block.getCollision(ball.getPosition(TOP)))
+					{
+						newVelocity.second = -newVelocity.second;
+						collision = true;
+					}
+					//bottom
+					if(block.getCollision(ball.getPosition(BOTTOM)))
+					{
+						newVelocity.second = -newVelocity.second;
+						collision = true;
+					}
+					ball.setVelocity(newVelocity);
+					/*
+					if(collision)
+					{
+						std::cout << "erase!" << std::endl;
+					}
+					*/
+					return collision;
+				}
+			),
+			blocks.end()
+		);
 
 		//draw to buffer:
 		for(auto & block : blocks)
