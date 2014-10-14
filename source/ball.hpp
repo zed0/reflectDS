@@ -15,7 +15,7 @@ class Ball
 	protected:
 	private:
 		int id;
-		u16* gfx;
+		u16 *gfx, *gfxSub;
 		std::pair<int, int> position;
 		std::pair<int, int> size;
 		std::pair<int, int> velocity;
