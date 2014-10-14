@@ -10,6 +10,7 @@ class Block
 		Block(int id, int color, std::pair<int,int> position, std::pair<int,int> size);
 		void draw();
 		bool getCollision(std::pair<int, int> point);
+		bool destroyed;
 	protected:
 	private:
 		int id;

@@ -58,48 +58,42 @@ int main(void) {
 
 		//do engine updates:
 		ball.tick(1);
-		blocks.erase(
-			std::remove_if(blocks.begin(), blocks.end(),
-				[&](Block block)
-				{
-					bool collision = false;
-					std::pair<int,int> newVelocity = ball.getVelocity();
-					//left
-					if(block.getCollision(ball.getPosition(LEFT)))
-					{
-						newVelocity.first = -newVelocity.first;
-						collision = true;
-					}
-					//right
-					if(block.getCollision(ball.getPosition(RIGHT)))
-					{
-						newVelocity.first = -newVelocity.first;
-						collision = true;
-					}
-					//top
-					if(block.getCollision(ball.getPosition(TOP)))
-					{
-						newVelocity.second = -newVelocity.second;
-						collision = true;
-					}
-					//bottom
-					if(block.getCollision(ball.getPosition(BOTTOM)))
-					{
-						newVelocity.second = -newVelocity.second;
-						collision = true;
-					}
-					ball.setVelocity(newVelocity);
-					/*
-					if(collision)
-					{
-						std::cout << "erase!" << std::endl;
-					}
-					*/
-					return collision;
-				}
-			),
-			blocks.end()
-		);
+		for(auto & block: blocks)
+		{
+			bool collision = false;
+			std::pair<int,int> newVelocity = ball.getVelocity();
+			//left
+			if(block.getCollision(ball.getPosition(LEFT)))
+			{
+				newVelocity.first = -newVelocity.first;
+				collision = true;
+			}
+			//right
+			if(block.getCollision(ball.getPosition(RIGHT)))
+			{
+				newVelocity.first = -newVelocity.first;
+				collision = true;
+			}
+			//top
+			if(block.getCollision(ball.getPosition(TOP)))
+			{
+				newVelocity.second = -newVelocity.second;
+				collision = true;
+			}
+			//bottom
+			if(block.getCollision(ball.getPosition(BOTTOM)))
+			{
+				newVelocity.second = -newVelocity.second;
+				collision = true;
+			}
+			ball.setVelocity(newVelocity);
+			if(collision)
+			{
+				block.destroyed = true;
+				//std::cout << "erase!" << std::endl;
+			}
+			
+		}
 
 		//draw to buffer:
 		for(auto & block : blocks)

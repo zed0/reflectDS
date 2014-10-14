@@ -12,6 +12,7 @@ Block::Block(int id, int color, std::pair<int,int> position, std::pair<int,int> 
 
 	this->position = position;
 	this->size = size;
+	this->destroyed = false;
 }
 
 void Block::draw()
@@ -26,7 +27,7 @@ void Block::draw()
 		gfx,              //pointer to the loaded graphics
 		0,                //sprite rotation/scale matrix index 
 		false,            //double the size when rotating?
-		false,            //hide the sprite?
+		destroyed,        //hide the sprite?
 		false, false,     //vflip, hflip
 		false             //apply mosaic
 	);
@@ -35,6 +36,10 @@ void Block::draw()
 //simple check whether point is inside rectangle
 bool Block::getCollision(std::pair<int, int> point)
 {
+	if(destroyed)
+	{
+		return false;
+	}
 	if(
 			point.first > position.first && point.first < position.first + size.first &&
 			point.second > position.second && point.second < position.second + size.second
