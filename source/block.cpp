@@ -1,6 +1,6 @@
 #include "block.hpp"
 
-Block::Block(int id, int color, int x, int y)
+Block::Block(int id, int color, std::pair<int,int> position, std::pair<int,int> size)
 {
 	this->id = id;
 
@@ -10,15 +10,15 @@ Block::Block(int id, int color, int x, int y)
 		gfx[i] = color | (color<<8);
 	}
 
-	this->x = x;
-	this->y = y;
+	this->position = position;
+	this->size = size;
 }
 
 void Block::draw()
 {
 	oamSet(&oamMain,      //main graphics engine context
 		id,                //oam index (0 to 127)  
-		x, y,             //x and y pixel location of the sprite
+		position.first, position.second,             //x and y pixel location of the sprite
 		0,                //priority, lower renders last (on top)
 		1,                //this is the palette index if multiple palettes or the alpha value if bmp sprite
 		SpriteSize_32x16,
@@ -32,8 +32,15 @@ void Block::draw()
 	);
 }
 
-//TODO:
-int Block::getCollision()
+//simple check whether point is inside rectangle
+bool Block::getCollision(std::pair<int, int> point)
 {
-	return 0;
+	if(
+			point.first > position.first && point.first < position.first + size.first &&
+			point.second > position.second && point.second < position.second + size.second
+	  )
+	{
+		return true;
+	}
+	return false;
 }

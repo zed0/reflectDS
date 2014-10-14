@@ -4,6 +4,9 @@
 #include <iostream>
 
 #include "block.hpp"
+#include "ball.hpp"
+
+//screen size: 256 × 192
 
 int main(void) {
 	videoSetMode(MODE_0_2D);
@@ -13,9 +16,13 @@ int main(void) {
 	consoleDemoInit(); //for debugging
 	oamInit(&oamMain, SpriteMapping_1D_32, false);
 	std::vector<Block> blocks;
+	Ball ball(0, 4, {20, 20}, {16, 16});
+	ball.setVelocity({1,1});
 	for(int i=0; i<20; ++i)
 	{
-		Block currentBlock(i, i%8, i*16, i*16);
+		std::pair<int, int> size = {32,16};
+		std::pair<int, int> position = {(i%10)*size.first,(i/10)*size.second};
+		Block currentBlock(i+1, (i%7)+1, position, size);
 		blocks.push_back(currentBlock);
 	}
 
@@ -31,12 +38,22 @@ int main(void) {
 
 	while(true)
 	{
-		//scanKeys();
+		//check for input:
+		scanKeys();
+
+		//do engine updates:
+		ball.tick(1);
+
+		//draw to buffer:
 		for(auto & block : blocks)
 		{
 			block.draw();
 		}
+		ball.draw();
+
+		//wait for natural refresh rate:
 		swiWaitForVBlank();
+		//draw to screen:
 		oamUpdate(&oamMain);
 	}
 
