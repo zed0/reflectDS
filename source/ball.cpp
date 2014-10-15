@@ -23,7 +23,7 @@ void Ball::draw()
 	std::pair<int, int> graphicPosition = position;
 	auto graphic = gfx;
 	//Check which screen the ball is on:
-	if(position.second <= 192)
+	if(position.second <= SCREEN_HEIGHT)
 	{
 		//Main screen
 		screen = &oamMain;
@@ -32,18 +32,18 @@ void Ball::draw()
 	{
 		//Sub screen
 		screen = &oamSub;
-		graphicPosition.second -= 192;
+		graphicPosition.second -= SCREEN_HEIGHT;
 		graphic = gfxSub;
 	}
 	oamSet(screen,      //main graphics engine context
-		id,               //oam index (0 to 127)  
+		id,               //oam index (0 to 127)
 		graphicPosition.first, graphicPosition.second, //x and y pixel location of the sprite
 		0,                //priority, lower renders last (on top)
 		1,                //this is the palette index if multiple palettes or the alpha value if bmp sprite
 		SpriteSize_16x16,
-		SpriteColorFormat_256Color, 
+		SpriteColorFormat_256Color,
 		graphic,          //pointer to the loaded graphics
-		0,                //sprite rotation/scale matrix index 
+		0,                //sprite rotation/scale matrix index
 		false,            //double the size when rotating?
 		false,            //hide the sprite?
 		false, false,     //vflip, hflip
@@ -53,8 +53,7 @@ void Ball::draw()
 
 void Ball::tick(int time)
 {
-	//std::pair<int, int> screenSize = {256, 192};
-	std::pair<int, int> screenSize = {256, 384}; //screen height doubled to account for two screens
+	std::pair<int, int> screenSize = {SCREEN_WIDTH, SCREEN_HEIGHT*2}; //screen height doubled to account for two screens
 	position.first += velocity.first*time;
 	position.second += velocity.second*time;
 
@@ -111,4 +110,41 @@ std::pair<int, int> Ball::getPosition(side_t side)
 			break;
 	}
 	return sidePosition;
+}
+
+void Ball::collide(Block& block)
+{
+	{
+		bool collision = false;
+		std::pair<int,int> newVelocity = getVelocity();
+		//left
+		if(block.getCollision(getPosition(LEFT)))
+		{
+			newVelocity.first = -newVelocity.first;
+			collision = true;
+		}
+		//right
+		if(block.getCollision(getPosition(RIGHT)))
+		{
+			newVelocity.first = -newVelocity.first;
+			collision = true;
+		}
+		//top
+		if(block.getCollision(getPosition(TOP)))
+		{
+			newVelocity.second = -newVelocity.second;
+			collision = true;
+		}
+		//bottom
+		if(block.getCollision(getPosition(BOTTOM)))
+		{
+			newVelocity.second = -newVelocity.second;
+			collision = true;
+		}
+		setVelocity(newVelocity);
+		if(collision)
+		{
+			block.destroyed = true;
+		}
+	}
 }

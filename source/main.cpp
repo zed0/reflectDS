@@ -14,6 +14,7 @@ int main(void) {
 	videoSetMode(MODE_0_2D);
 	videoSetModeSub(MODE_0_2D);
 	vramSetBankA(VRAM_A_MAIN_SPRITE);
+	//vramSetBankC(VRAM_C_SUB_BG);
 	vramSetBankD(VRAM_D_SUB_SPRITE);
 	oamInit(&oamMain, SpriteMapping_1D_32, false);
 	oamInit(&oamSub, SpriteMapping_1D_32, false);
@@ -42,58 +43,45 @@ int main(void) {
 	//create our game objects:
 	Ball ball(0, 4, {20, 50}, {16, 16});
 	ball.setVelocity({1,1});
+	//Block paddle(1, 5, {50, 300}, {32,16});
 	std::vector<Block> blocks;
 	for(int i=0; i<20; ++i)
 	{
 		std::pair<int, int> size = {32,16};
 		std::pair<int, int> position = {(i%10)*size.first,(i/10)*size.second};
-		Block currentBlock(i+1, (i%7)+1, position, size);
+		Block currentBlock(i+2, (i%7)+1, position, size);
 		blocks.push_back(currentBlock);
 	}
 
+	touchPosition touch;
 	while(true)
 	{
 		//check for input:
 		scanKeys();
+		int held = keysHeld();
+		touchRead(&touch);
+		if(held & KEY_TOUCH)
+		{
+			/*
+			for(int i=-10; i<10; ++i)
+			{
+				for(int j=-10; j<10; ++j)
+				{
+					VRAM_C[touch.px+i+(touch.py+j)*SCREEN_WIDTH] = rand();
+				}
+			}
+			*/
+			//paddle.setPosition({touch.px, 192+touch.py});
+		}
 
 		//do engine updates:
 		ball.tick(1);
 		for(auto & block: blocks)
 		{
-			bool collision = false;
-			std::pair<int,int> newVelocity = ball.getVelocity();
-			//left
-			if(block.getCollision(ball.getPosition(LEFT)))
-			{
-				newVelocity.first = -newVelocity.first;
-				collision = true;
-			}
-			//right
-			if(block.getCollision(ball.getPosition(RIGHT)))
-			{
-				newVelocity.first = -newVelocity.first;
-				collision = true;
-			}
-			//top
-			if(block.getCollision(ball.getPosition(TOP)))
-			{
-				newVelocity.second = -newVelocity.second;
-				collision = true;
-			}
-			//bottom
-			if(block.getCollision(ball.getPosition(BOTTOM)))
-			{
-				newVelocity.second = -newVelocity.second;
-				collision = true;
-			}
-			ball.setVelocity(newVelocity);
-			if(collision)
-			{
-				block.destroyed = true;
-				//std::cout << "erase!" << std::endl;
-			}
-			
+			ball.collide(block);
 		}
+		//ball.collide(paddle);
+		//paddle.destroyed = false;
 
 		//draw to buffer:
 		for(auto & block : blocks)
@@ -101,12 +89,24 @@ int main(void) {
 			block.draw();
 		}
 		ball.draw();
+		//paddle.draw();
 
 		//wait for natural refresh rate:
 		swiWaitForVBlank();
 		//draw to screens:
 		oamUpdate(&oamMain);
 		oamUpdate(&oamSub);
+		if(held & KEY_TOUCH)
+		{
+			for(int i=-10; i<10; ++i)
+			{
+				for(int j=-10; j<10; ++j)
+				{
+					VRAM_C[touch.px+i+(touch.py+j)*SCREEN_WIDTH] = rand();
+				}
+			}
+			//paddle.setPosition({touch.px, 192+touch.py});
+		}
 	}
 
 	return 0;

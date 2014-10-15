@@ -2,7 +2,11 @@
 #define BALL_HPP
 
 #include <nds.h>
+
 #include <utility>
+#include <vector>
+
+#include "block.hpp"
 
 enum side_t{
 	LEFT,
@@ -20,6 +24,7 @@ class Ball
 		void setVelocity(std::pair<int, int> velocity);
 		std::pair<int, int> getVelocity();
 		std::pair<int, int> getPosition(side_t side);
+		void collide(Block& block);
 	protected:
 	private:
 		int id;
