@@ -6,18 +6,22 @@
 
 #include "block.hpp"
 #include "ball.hpp"
+#include "line.hpp"
 
 //screen size: 256 × 192
 
 int main(void) {
 	//initialise both screens to display 2D sprites:
-	videoSetMode(MODE_0_2D);
-	videoSetModeSub(MODE_0_2D);
+	videoSetMode(MODE_5_2D);
+	videoSetModeSub(MODE_5_2D);
 	vramSetBankA(VRAM_A_MAIN_SPRITE);
-	//vramSetBankC(VRAM_C_SUB_BG);
+	vramSetBankC(VRAM_C_SUB_BG);
 	vramSetBankD(VRAM_D_SUB_SPRITE);
 	oamInit(&oamMain, SpriteMapping_1D_32, false);
 	oamInit(&oamSub, SpriteMapping_1D_32, false);
+	int background = bgInitSub(3, BgType_Bmp8, BgSize_B8_256x256, 5,0);
+	//dmaCopy(gridbgBitmap, bgGetGfxPtr(background), 256*192);
+	BG_PALETTE_SUB[1] = RGB15( 0, 0,31); //blue
 
 	//consoleDemoInit(); //Uncomment for debugging
 
@@ -63,16 +67,18 @@ int main(void) {
 		if(held & KEY_TOUCH)
 		{
 			/*
-			for(int i=-10; i<10; ++i)
+			for(int i=-3; i<3; ++i)
 			{
-				for(int j=-10; j<10; ++j)
+				for(int j=-3; j<3; ++j)
 				{
-					VRAM_C[touch.px+i+(touch.py+j)*SCREEN_WIDTH] = rand();
+					bgGetGfxPtr(background)[(touch.px/2+i) + (touch.py/2+j)*SCREEN_WIDTH] = 1 | (1<<8);
+					bgGetGfxPtr(background)[SCREEN_WIDTH/2 + (touch.px/2+i) + (touch.py/2+j)*SCREEN_WIDTH] = 1 | (1<<8);
 				}
 			}
 			*/
 			//paddle.setPosition({touch.px, 192+touch.py});
 		}
+		Line line({0,0}, {100,100});
 
 		//do engine updates:
 		ball.tick(1);
