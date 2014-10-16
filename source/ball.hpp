@@ -18,20 +18,21 @@ enum side_t{
 class Ball
 {
 	public:
-		Ball(int id, int color, std::pair<int,int> position, std::pair<int, int> size);
+		Ball(int id, int color, std::pair<float,float> position, std::pair<int, int> size);
 		void draw();
 		void tick(int time);
-		void setVelocity(std::pair<int, int> velocity);
-		std::pair<int, int> getVelocity();
-		std::pair<int, int> getPosition(side_t side);
+		void setVelocity(std::pair<float, float> velocity);
+		std::pair<float, float> getVelocity();
+		std::pair<float, float> getPosition();
+		std::pair<float, float> getPosition(side_t side);
 		void collide(Block& block);
 	protected:
 	private:
 		int id;
 		u16 *gfx, *gfxSub;
-		std::pair<int, int> position;
+		std::pair<float, float> position;
 		std::pair<int, int> size;
-		std::pair<int, int> velocity;
+		std::pair<float, float> velocity;
 };
 
 #endif

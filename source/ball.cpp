@@ -1,6 +1,6 @@
 #include "ball.hpp"
 
-Ball::Ball(int id, int color, std::pair<int,int> position, std::pair<int, int> size)
+Ball::Ball(int id, int color, std::pair<float,float> position, std::pair<int, int> size)
 {
 	this->id = id;
 
@@ -14,7 +14,6 @@ Ball::Ball(int id, int color, std::pair<int,int> position, std::pair<int, int> s
 
 	this->position = position;
 	this->size = size;
-	this->velocity = {0,0};
 }
 
 void Ball::draw()
@@ -79,19 +78,24 @@ void Ball::tick(int time)
 	}
 }
 
-void Ball::setVelocity(std::pair<int, int> velocity)
+void Ball::setVelocity(std::pair<float, float> velocity)
 {
 	this->velocity = velocity;
 }
 
-std::pair<int, int> Ball::getVelocity()
+std::pair<float, float> Ball::getVelocity()
 {
 	return velocity;
 }
 
-std::pair<int, int> Ball::getPosition(side_t side)
+std::pair<float, float> Ball::getPosition()
 {
-	std::pair<int, int> sidePosition = position;
+    return position;
+}
+
+std::pair<float, float> Ball::getPosition(side_t side)
+{
+	std::pair<float, float> sidePosition = position;
 	switch(side)
 	{
 		case LEFT:
@@ -116,7 +120,7 @@ void Ball::collide(Block& block)
 {
 	{
 		bool collision = false;
-		std::pair<int,int> newVelocity = getVelocity();
+		std::pair<float,float> newVelocity = getVelocity();
 		//left
 		if(block.getCollision(getPosition(LEFT)))
 		{

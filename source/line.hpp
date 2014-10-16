@@ -9,13 +9,16 @@
 class Line
 {
 	public:
-		Line(std::pair<int, int> start, std::pair<int, int> end);
+		Line(std::pair<float, float> start, std::pair<float, float> end);
 		void drawPixel(std::pair<int,int> position, int background, int color);
 		void draw(int background, int color);
+        std::pair<float,float> circleCollide(std::pair<float, float> position, float radius);
+        std::pair<float,float> getNormal();
+        float getLength();
 	protected:
 	private:
-		std::pair<int, int> start;
-		std::pair<int, int> end;
+		std::pair<float, float> start;
+		std::pair<float, float> end;
 };
 
 #endif

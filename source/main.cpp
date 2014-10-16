@@ -45,7 +45,7 @@ int main(void) {
 
 	//create our game objects:
 	Ball ball(0, 4, {20, 50}, {16, 16});
-	ball.setVelocity({1,1});
+	ball.setVelocity({0,2});
 	//Block paddle(1, 5, {50, 300}, {32,16});
 	std::vector<Block> blocks;
 	for(int i=0; i<20; ++i)
@@ -56,7 +56,7 @@ int main(void) {
 		blocks.push_back(currentBlock);
 	}
 	std::vector<Line> lines;
-	std::pair<int, int> lastPosition = {0,0};
+	std::pair<int, int> lastPosition = {0,SCREEN_HEIGHT};
 
 	touchPosition touch;
 	while(true)
@@ -67,10 +67,29 @@ int main(void) {
 		touchRead(&touch);
 		if(held & KEY_TOUCH)
 		{
-			std::pair<int, int> position = {touch.px, touch.py};
+			std::pair<float, float> position = {touch.px, touch.py+SCREEN_HEIGHT};
 			lines.push_back({lastPosition, position});
 			lastPosition = position;
-			//paddle.setPosition({touch.px, 192+touch.py});
+            while([&lines](){
+                float total = 0.0f;
+                for(auto line: lines)
+                {
+                    total+=line.getLength();
+                }
+                if(total>100)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }())
+            {
+                lines.at(0).draw(backgroundSub,0);
+                lines.erase(lines.begin());
+            }
+			//paddle.setPosition({touch.px, touch.py+SCREEN_HEIGHT});
 		}
 
 		//do engine updates:
@@ -78,6 +97,31 @@ int main(void) {
 		for(auto & block: blocks)
 		{
 			ball.collide(block);
+		}
+		for(auto & line: lines)
+		{
+			auto collision = line.circleCollide(ball.getPosition(), 1);
+            if(collision.first > 0)
+            {
+                std::pair<float,float> velocity = ball.getVelocity();
+                std::pair<float,float> normal = line.getNormal();
+                float initialMag = sqrt(velocity.first*velocity.first + velocity.second*velocity.second);
+                float normalMag = sqrt(normal.first*normal.first + normal.second*normal.second);
+                normal.first /= normalMag;
+                normal.second /= normalMag;
+                float dotproduct = velocity.first*normal.first + velocity.second*normal.second;
+                std::pair<float, float> reflection;
+                reflection.first = (-2.0f*dotproduct*normal.first) + velocity.first;
+                reflection.second = (-2.0f*dotproduct*normal.second) + velocity.second;
+                float mag = sqrt(reflection.first*reflection.first + reflection.second*reflection.second);
+                reflection.first /= mag;
+                reflection.second /= mag;
+                reflection.first *= initialMag;
+                reflection.second *= initialMag;
+                ball.setVelocity(reflection);
+                ball.tick(2);
+                break;
+            }
 		}
 		//ball.collide(paddle);
 		//paddle.destroyed = false;
@@ -89,14 +133,10 @@ int main(void) {
 		}
 		ball.draw();
 		//paddle.draw();
-		/*
 		for(auto & line : lines)
 		{
 			line.draw(backgroundSub, 1);
 		}
-		*/
-		Line foo({0,0},{0,0});
-		foo.drawPixel({touch.px,touch.py},backgroundSub,1);
 
 		//wait for natural refresh rate:
 		swiWaitForVBlank();
