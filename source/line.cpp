@@ -6,11 +6,30 @@ Line::Line(std::pair<int, int> start, std::pair<int, int> end)
 	this->end = end;
 }
 
-void Line::draw(int background)
+void Line::drawPixel(std::pair<int,int> position, int background, int color)
+{
+	int pixValue;
+	if(position.first%2)
+	{
+		pixValue = color<<8;
+	}
+	else
+	{
+		pixValue = color;
+	}
+	if(position.second%2)
+	{
+		bgGetGfxPtr(background)[SCREEN_WIDTH/2 + (position.first/2) + (position.second/2)*SCREEN_WIDTH] = pixValue;
+	}
+	else
+	{
+		bgGetGfxPtr(background)[(position.first/2) + (position.second/2)*SCREEN_WIDTH] = pixValue;
+	}
+}
+
+void Line::draw(int background, int color)
 {
 
-	bgGetGfxPtr(background)[(touch.px/2+i) + (touch.py/2+j)*SCREEN_WIDTH] = 1 | (1<<8);
-	bgGetGfxPtr(background)[SCREEN_WIDTH/2 + (touch.px/2+i) + (touch.py/2+j)*SCREEN_WIDTH] = 1 | (1<<8);
 	// Bresenham's line algorithm
 	const bool steep = (abs(end.second - start.second) > abs(end.first - end.first));
 	if(steep)
@@ -38,11 +57,11 @@ void Line::draw(int background)
 	{
 		if(steep)
 		{
-			//SetPixel(y,x, color);
+			drawPixel({y,x}, background, color);
 		}
 		else
 		{
-			//SetPixel(x,y, color);
+			drawPixel({x,y}, background, color);
 		}
 
 		error -= dy;

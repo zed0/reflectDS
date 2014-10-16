@@ -19,8 +19,7 @@ int main(void) {
 	vramSetBankD(VRAM_D_SUB_SPRITE);
 	oamInit(&oamMain, SpriteMapping_1D_32, false);
 	oamInit(&oamSub, SpriteMapping_1D_32, false);
-	int background = bgInitSub(3, BgType_Bmp8, BgSize_B8_256x256, 5,0);
-	//dmaCopy(gridbgBitmap, bgGetGfxPtr(background), 256*192);
+	int backgroundSub = bgInitSub(3, BgType_Bmp8, BgSize_B8_256x256, 5,0);
 	BG_PALETTE_SUB[1] = RGB15( 0, 0,31); //blue
 
 	//consoleDemoInit(); //Uncomment for debugging
@@ -56,6 +55,8 @@ int main(void) {
 		Block currentBlock(i+2, (i%7)+1, position, size);
 		blocks.push_back(currentBlock);
 	}
+	std::vector<Line> lines;
+	std::pair<int, int> lastPosition = {0,0};
 
 	touchPosition touch;
 	while(true)
@@ -66,19 +67,11 @@ int main(void) {
 		touchRead(&touch);
 		if(held & KEY_TOUCH)
 		{
-			/*
-			for(int i=-3; i<3; ++i)
-			{
-				for(int j=-3; j<3; ++j)
-				{
-					bgGetGfxPtr(background)[(touch.px/2+i) + (touch.py/2+j)*SCREEN_WIDTH] = 1 | (1<<8);
-					bgGetGfxPtr(background)[SCREEN_WIDTH/2 + (touch.px/2+i) + (touch.py/2+j)*SCREEN_WIDTH] = 1 | (1<<8);
-				}
-			}
-			*/
+			std::pair<int, int> position = {touch.px, touch.py};
+			lines.push_back({lastPosition, position});
+			lastPosition = position;
 			//paddle.setPosition({touch.px, 192+touch.py});
 		}
-		Line line({0,0}, {100,100});
 
 		//do engine updates:
 		ball.tick(1);
@@ -96,23 +89,20 @@ int main(void) {
 		}
 		ball.draw();
 		//paddle.draw();
+		/*
+		for(auto & line : lines)
+		{
+			line.draw(backgroundSub, 1);
+		}
+		*/
+		Line foo({0,0},{0,0});
+		foo.drawPixel({touch.px,touch.py},backgroundSub,1);
 
 		//wait for natural refresh rate:
 		swiWaitForVBlank();
 		//draw to screens:
 		oamUpdate(&oamMain);
 		oamUpdate(&oamSub);
-		if(held & KEY_TOUCH)
-		{
-			for(int i=-10; i<10; ++i)
-			{
-				for(int j=-10; j<10; ++j)
-				{
-					VRAM_C[touch.px+i+(touch.py+j)*SCREEN_WIDTH] = rand();
-				}
-			}
-			//paddle.setPosition({touch.px, 192+touch.py});
-		}
 	}
 
 	return 0;
